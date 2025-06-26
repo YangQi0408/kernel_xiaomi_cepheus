@@ -1,40 +1,41 @@
 #!/bin/bash
 
-#set -e
-
-KERNEL_DEFCONFIG=cepheus_defconfig
-ANYKERNEL3_DIR=$PWD/AnyKernel3/
+ANYKERNEL3_DIR=$PWD/AnyKernel/
 FINAL_KERNEL_ZIP=InfiniR_cepheus_v1.39_KSUN.zip
 
-# paths
-TC="/home/raystef66/kernel/prebuilts"
-
-PATH=${TC}/clang-r416183b1/bin:${TC}/aarch64/bin:${TC}/arm/bin:$PATH
+TOOLCHAIN_PATH="/home/yangqi/toolchains/clang-r416183b1/bin"
 
 export LLVM=1
-export CC=clang
-export CROSS_COMPILE=aarch64-linux-gnu-
-export ARCH=arm64
 export USE_CCACHE=1
+export PATH="$TOOLCHAIN_PATH:$PATH"
+export CCACHE_DIR="$HOME/.cache/ccache_xm9kernel" 
+export PATH="/usr/bin/ccache:$PATH"
+echo "CCACHE_DIR: [$CCACHE_DIR]"
 
-# Speed up build process
-MAKE="./makeparallel"
+ccache --version
+ccache -s
+clang -v
 
-make O=out ARCH=arm64 cepheus_defconfig
-
-START=$(date +"%s")
-
-make ARCH=arm64 \
-        O=out \
-        CC=clang \
-		AR=llvm-ar \
+MAKE_ARGS="AR=llvm-ar \
+        AS=as \
+        ARCH=arm64 \
+        SUBARCH=arm64 \
+        O=out \AR=llvm-ar \
         LD=ld.lld \
         NM=llvm-nm \
         OBJCOPY=llvm-objcopy \
         OBJDUMP=llvm-objdump \
         STRIP=llvm-strip \
-        -j$(nproc --all)
-               
+        CROSS_COMPILE=aarch64-linux-gnu- \
+        CROSS_COMPILE_ARM32=arm-linux-gnueabi- \
+        CROSS_COMPILE_COMPAT=arm-linux-gnueabi- \
+        CLANG_TRIPLE=aarch64-linux-gnu-"
+
+make CC="ccache clang" CXX="ccache clang++" $MAKE_ARGS cepheus_defconfig -j12
+
+START=$(date +"%s")
+
+make CC="ccache clang" CXX="ccache clang++" $MAKE_ARGS -j12
 
 echo -e "$yellow**** Verify Image.gz-dtb ****$nocol"
 ls $PWD/out/arch/arm64/boot/Image.gz-dtb
