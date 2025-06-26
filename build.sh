@@ -15,6 +15,7 @@ echo "CCACHE_DIR: [$CCACHE_DIR]"
 ccache --version
 ccache -s
 clang -v
+which clang
 
 MAKE_ARGS="AR=llvm-ar \
         AS=as \
