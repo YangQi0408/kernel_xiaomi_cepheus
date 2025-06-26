@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ANYKERNEL3_DIR=$PWD/AnyKernel/
+ANYKERNEL3_DIR=$PWD/Anykernel/
 FINAL_KERNEL_ZIP=InfiniR_cepheus_v1.39_KSUN.zip
 
 TOOLCHAIN_PATH="/home/yangqi/toolchains/proton-clang/bin"
